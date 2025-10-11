@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  telegram_bot:
+    build: .
+    container_name: telegram_channel_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Монтирование базы данных для сохранения между перезапусками
+      - ./data:/data
+      # Монтирование логов (опционально)
+      - ./logs:/app/logs
+    environment:
+      - TZ=Europe/Kiev
+      - DATABASE_PATH=/data/bot_data.db
+    # Ограничение ресурсов (опционально)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

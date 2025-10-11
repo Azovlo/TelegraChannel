@@ -1,0 +1,113 @@
+# Dockerfile
+FROM python:3.11-slim
+
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Создание рабочей директории
+WORKDIR /app
+
+# Копирование файла зависимостей
+COPY requirements.txt .
+
+# Установка Python зависимостей
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Копирование кода приложения
+COPY . .
+
+# Создание директории для базы данных
+RUN mkdir -p /data
+
+# Переменная окружения для базы данных
+ENV DATABASE_PATH=/data/bot_data.db
+
+# Запуск приложения
+CMD ["python", "main.py"]
+
+
+# docker-compose.yml
+version: '3.8'
+
+services:
+  telegram_bot:
+    build: .
+    container_name: telegram_channel_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Монтирование базы данных для сохранения между перезапусками
+      - ./data:/data
+      # Монтирование логов (опционально)
+      - ./logs:/app/logs
+    environment:
+      - TZ=Europe/Kiev
+      - DATABASE_PATH=/data/bot_data.db
+    # Ограничение ресурсов (опционально)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# docker-compose.dev.yml
+# Конфигурация для разработки
+version: '3.8'
+
+services:
+  telegram_bot:
+    build: .
+    container_name: telegram_channel_bot_dev
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - ./data:/data
+    environment:
+      - TZ=Europe/Kiev
+      - RUN_MODE=once
+    command: python main.py
+
+
+# .dockerignore
+# Игнорируем ненужные файлы при сборке Docker образа
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.db
+*.sqlite
+*.sqlite3
+venv/
+env/
+.env
+.venv
+.git
+.gitignore
+*.log
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+README.md
+docs/
+tests/
+*.md
+data/
+logs/

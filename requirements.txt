@@ -1,0 +1,21 @@
+# Telegram
+python-telegram-bot==21.0
+
+# HTTP клиент
+aiohttp==3.9.1
+
+# Парсинг HTML
+beautifulsoup4==4.12.2
+lxml==5.1.0
+
+# Переменные окружения
+python-dotenv==1.0.0
+
+# AI API
+anthropic==0.18.1
+
+# User-Agent для парсинга
+fake-useragent==1.4.0
+
+# База данных (встроенная SQLite)
+# sqlite3 входит в стандартную библиотеку Python
